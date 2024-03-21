@@ -1,33 +1,13 @@
+import time
+import urllib3
+import requests
+import firebase_admin
 from flask import Flask, request, jsonify
-import cx_Oracle
-import sys
 
 app = Flask(__name__)
 
 tokens = {}
 representatives = {}
-host = "dbcrisdu.crisdulabs.com.br"
-port = "1521"
-service_name = "desenv.snprodcrisdupri.vcnprdcrisdu.oraclevcn.com"
-
-
-def conecting_to_db():
-    try:
-
-        dsn = f"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={service_name})(SERVER=dedicated)))"
-
-        return cx_Oracle.connect("roman", "desenv", dsn)
-    except cx_Oracle.DatabaseError as e:
-        print("Error connecting to dbcrisdu.crisdulabs.com" + str(e))
-
-
-cnxn = conecting_to_db()
-
-
-def busca_tokens_rep(representative_id):
-    cnxn.prepare("select TOKEN from ROMAN.TOKENNOTIFICACOESVENDAS where IDREPRESENTANTE = :id_representative")
-    cnxn.execute(None, {'TOKEN': representative_id})
-    return cnxn.fetchall()
 
 
 @app.route('/register_token', methods=['POST'])
@@ -37,8 +17,6 @@ def register_token():
     if 'token' in data and 'representative_id' in data:
         token = data['token']
         representative_id = data['representative_id']
-        busca = busca_tokens_rep(representative_id)
-        print("busca:", busca)
         tokens[token] = representative_id
         representatives[representative_id] = token
         print("tokens", tokens)
@@ -48,21 +26,77 @@ def register_token():
         return jsonify({'error': 'Missing token or representative_id in request'}), 400
 
 
-@app.route('/send_notification', methods=['POST'])
-def send_notification():
+@app.route('/send_message', methods=['POST'])
+def send_message():
     data = request.json
-    if 'token' in data and 'message' in data:
+    if 'message' in data and 'token' in data and 'title' in data:
+        print("Data_recives: ", data)
         token = data['token']
+        title = data['title']
         message = data['message']
-        if token in tokens:
-            representative_id = tokens[token]
-            # Aqui você pode implementar o envio da notificação para o representante específico
-            return jsonify({'message': f'Notification sent to representative {representative_id}'}), 200
-        else:
-            return jsonify({'error': 'Invalid token'}), 400
+        enviar_notificacao(token, title, message)
+        # print(retorno)
+        return jsonify({'message': 'Informations body were recived successfully'}), 200
     else:
-        return jsonify({'error': 'Missing token or message in request'}), 400
+        return jsonify({'error': 'Missing informations body request'}), 400
 
 
-if __name__ == '__main__':
+def get_access_token():
+    cred = firebase_admin.credentials.Certificate("second-14d46-firebase-adminsdk-egrsc-e857f12342.json")
+    t = cred.get_access_token()
+    return t.access_token
+
+
+def enviar_msg(params):
+    headers = {"Content-Type": "application/json",
+               "Authorization": "Bearer " + get_access_token()}
+
+    print(headers)
+    print(params)
+
+    urllib3.disable_warnings()
+
+    r = requests.post("https://fcm.googleapis.com/v1/projects/second-14d46/messages:send",
+                      json=params,
+                      headers=headers,
+                      verify=False)
+    return {"STATUS_CODE": r.status_code, "TEXT": r.text}
+
+
+def enviar_notificacao(token, title, mensage):
+    resultado = enviar_token(token, 39493, str(title), str(mensage), None, None)
+    print(resultado)
+
+    if resultado["STATUS_CODE"] != 200:
+        print("Opa, falhou no envio. Não vou continuar.")
+
+    time.sleep(2)
+
+
+def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
+    params = {"message": {
+        "data": {
+            "title": TITLE,
+            "body": MESSAGE,
+            "idmsg": str(IDMSG),
+        },
+        "notification": {
+            "title": TITLE,
+            "body": MESSAGE,
+        },
+        "token": TOKEN,
+    }
+    }
+
+    if IMGSRC is not None:
+        params["message"]["data"]["imgsrc"] = IMGSRC
+        params["notification"]["data"]["image"] = IMGSRC
+
+    if URL is not None:
+        params["message"]["data"]["url"] = URL
+
+    return enviar_msg(params)
+
+
+if __name__ == "__main__":
     app.run(debug=True)
