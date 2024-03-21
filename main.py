@@ -100,3 +100,5 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+# print("a")
