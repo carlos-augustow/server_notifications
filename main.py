@@ -151,7 +151,11 @@ def register_token():
         return jsonify({'error': 'Missing token or representative_id in request'}), 400
 
 
-@app.route('/send_message/<token>/<title>/<message>', methods=['POST'])
+@app.route('/write_message/<message>', methods=['GET'])
+def write_message(message):
+    return jsonify({'message': message})
+
+@app.route('/send_message/<token>/<title>/<message>', methods=['GET'])
 def send_message(token, title, message):
     if message and token and title:
         enviar_notificacao(token, title, message)
