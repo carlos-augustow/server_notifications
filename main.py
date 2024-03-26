@@ -34,32 +34,6 @@ def create_db():
     conn.commit()
     conn.close()
 
-
-# def create_db():
-#     conn = sqlite3.connect('tokens.db')
-#     cursor = conn.cursor()
-#
-#     create_table_tokens_sql = '''
-#         CREATE TABLE IF NOT EXISTS tokens (
-#             id_token INTEGER PRIMARY KEY AUTOINCREMENT,
-#             token TEXT NOT NULL,
-#             id_representante INTEGER,
-#             FOREIGN KEY (id_representante) REFERENCES representatives(id_representante)
-#         );
-#     '''
-#
-#     create_table_representatives_sql = '''
-#         CREATE TABLE IF NOT EXISTS representatives (
-#             id_representante INTEGER PRIMARY KEY AUTOINCREMENT
-#         );
-#     '''
-#
-#     cursor.execute(create_table_tokens_sql)
-#     cursor.execute(create_table_representatives_sql)
-#     conn.commit()
-#     conn.close()
-
-
 def grava_token(idrep, token):
     create_db()
     conn = sqlite3.connect('tokens.db')
@@ -177,14 +151,9 @@ def register_token():
         return jsonify({'error': 'Missing token or representative_id in request'}), 400
 
 
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    data = request.json
-    if 'message' in data and 'token' in data and 'title' in data:
-        print("Data_recives: ", data)
-        token = data['token']
-        title = data['title']
-        message = data['message']
+@app.route('/send_message/<token>/<title>/<message>', methods=['POST'])
+def send_message(token, title, message):
+    if message and token and title:
         enviar_notificacao(token, title, message)
         # print(retorno)
         return jsonify({'message': 'Informations body were recived successfully'}), 200
