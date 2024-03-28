@@ -4,13 +4,9 @@ import requests
 import firebase_admin
 import sqlite3
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
-
-tokens = {}
-representatives = {}
-
 
 def create_db():
     conn = sqlite3.connect('tokens.db')
@@ -113,7 +109,9 @@ def delete_db_query():
     cursor.execute(delete_table_sql)
     conn.commit()
     conn.close()
-
+@app.route('/.well-known/<path:path>')
+def send_json(path):
+    return send_from_directory('well-known', path)
 
 @app.route('/delete_db', methods=['GET'])
 def delete_db():

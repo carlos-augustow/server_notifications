@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "br.com.crisdulabs.dev1.twa",
+        "sha256_cert_fingerprints": ["65:D1:76:6D:A7:CA:88:4B:54:76:DC:34:C9:20:81:20:D3:F0:7C:1E:6A:C5:44:4D:02:75:58:EB:8F:61:A5:1F"]
+      }
+    }]
