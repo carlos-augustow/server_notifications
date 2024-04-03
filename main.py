@@ -109,9 +109,12 @@ def delete_db_query():
     cursor.execute(delete_table_sql)
     conn.commit()
     conn.close()
-@app.route('/.well-known/<path:path>')
+
+
+@app.route('/.well-known/<path:path>', methods=['GET'])
 def send_json(path):
-    return send_from_directory('well-known', path)
+    return send_from_directory('.well-known', path)
+
 
 @app.route('/delete_db', methods=['GET'])
 def delete_db():
@@ -158,7 +161,7 @@ def send_message(token, title, message):
     if message and token and title:
         enviar_notificacao(token, title, message)
         # print(retorno)
-        return jsonify({'message': 'Informations body were recived successfully'}), 200
+        return jsonify({'message': 'Informations body were recived successfully'), 200
     else:
         return jsonify({'error': 'Missing informations body request'}), 400
 
@@ -191,6 +194,7 @@ def enviar_notificacao(token, title, mensage):
 
     if resultado["STATUS_CODE"] != 200:
         print("Opa, falhou no envio. Não vou continuar.")
+        print(resultado["STATUS_CODE"])
 
     time.sleep(2)
 
@@ -221,4 +225,4 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=3000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
