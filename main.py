@@ -1,8 +1,11 @@
-import time
-import urllib3
-import requests
-import firebase_admin
 import sqlite3
+import requests
+import urllib3
+import time
+import firebase_admin
+import schedule
+import threading
+
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -75,18 +78,25 @@ def get_tokens(id_representante):
     return tokens
 
 
+
+
+
 def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
-    select_tokens = '''
-     SELECT *
-     FROM tokens;
-     '''
-    cursor.execute(select_tokens)
+    
+    # Fetch column names
+    cursor.execute('SELECT * FROM tokens')
+    column_names = [description[0] for description in cursor.description]
+    
+    # Fetch all rows
     rows = cursor.fetchall()
     conn.close()
-    return rows
-
+    
+    # Convert rows to list of dictionaries
+    result = [dict(zip(column_names, row)) for row in rows]
+    
+    return result
 
 def delete_token(id_representante):
     conn = sqlite3.connect('tokens.db')
@@ -161,7 +171,7 @@ def send_message(token, title, message):
     if message and token and title:
         enviar_notificacao(token, title, message)
         # print(retorno)
-        return jsonify({'message': 'Informations body were recived successfully'), 200
+        return jsonify({'message': 'Informations body were recived successfully'}), 200
     else:
         return jsonify({'error': 'Missing informations body request'}), 400
 
@@ -188,8 +198,8 @@ def enviar_msg(params):
     return {"STATUS_CODE": r.status_code, "TEXT": r.text}
 
 
-def enviar_notificacao(token, title, mensage):
-    resultado = enviar_token(token, 39493, str(title), str(mensage), None, None)
+def enviar_notificacao(token, idmsg, title, mensage):
+    resultado = enviar_token(token, idmsg, str(title), str(mensage), None, None)
     print(resultado)
 
     if resultado["STATUS_CODE"] != 200:
@@ -224,5 +234,51 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
     return enviar_msg(params)
 
 
+
+def chama_msg_noti():
+        try:
+            response = requests.get("https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipush")
+            response.raise_for_status()  # Levanta um erro se a requisição falhar
+            return response.json()
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")
+        except Exception as err:
+            print(f"Other error occurred: {err}")
+
+
+def exibe_msg_noti():
+    msgs_da_noti = chama_msg_noti()
+    
+    if 'items' in msgs_da_noti:
+        notifs = msgs_da_noti['items']
+        print(notifs)
+
+        for notif in notifs:
+            print(notif)
+            id_representante = notif['idrepresentante']
+            tokens = get_tokens(id_representante)
+            if tokens:
+                for token in tokens:
+                    print(token)
+                    # enviar_notificacao(token["token"], notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+
+
+ 
+    else:
+        print("Resposta inesperada:", msgs_da_noti)
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+schedule.every(10).seconds.do(exibe_msg_noti)
+
 if __name__ == "__main__":
+    # Start the schedule in a separate thread
+    schedule_thread = threading.Thread(target=run_schedule)
+    schedule_thread.daemon = True
+    schedule_thread.start()
+
+    # Start the Flask app
     app.run(debug=True, host="0.0.0.0", port=5000)
