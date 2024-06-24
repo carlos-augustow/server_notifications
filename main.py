@@ -6,10 +6,13 @@ import firebase_admin
 import schedule
 import threading
 
+from flask_cors import CORS
 
 from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": "*"}})
 
 def create_db():
     conn = sqlite3.connect('tokens.db')
@@ -155,14 +158,12 @@ def register_token(id_rep, token):
 
     if token_fcm and id_repr:
         print("Token recebido: ", token_fcm)
-    #     token = data['token']
-    #     id_representante = data['idrep']
-    #     grava_token(id_representante, token)
-    #     return jsonify({"sucess": True}), 200
-    # else:
-    #     return jsonify({'sucess': False}), 400
-        return jsonify({'sucess': True}), 200
-    return jsonify({'sucess': False}), 200
+        grava_token(id_repr, token)
+        return jsonify({"sucess": True}), 200
+    else:
+        return jsonify({'sucess': False}), 200
+    #     return jsonify({'sucess': True}), 200
+    # return jsonify({'sucess': False}), 200
 
 
 @app.route('/write_message/<message>', methods=['GET'])
@@ -285,4 +286,4 @@ if __name__ == "__main__":
     schedule_thread.start()
 
     # Start the Flask app
-    app.run(debug=True, host="0.0.0.0", port=4000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
