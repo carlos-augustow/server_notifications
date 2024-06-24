@@ -74,7 +74,7 @@ def get_tokens(id_representante):
         FROM tokens 
         WHERE id_representante = ?
     '''
-    cursor.execute(select_tokens, (id_representante))
+    cursor.execute(select_tokens, (id_representante,))
     tokens = cursor.fetchall()
     conn.close()
 
@@ -235,7 +235,9 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
     if URL is not None:
         params["message"]["data"]["url"] = URL
 
-    return enviar_msg(params)
+    print("payload: ", params)
+
+   # return enviar_msg(params)
 
 
 
@@ -252,6 +254,10 @@ def chama_msg_noti():
 
 def exibe_msg_noti():
     msgs_da_noti = chama_msg_noti()
+
+    print(retorna_tudo_banco())
+
+
     
     if 'items' in msgs_da_noti:
         notifs = msgs_da_noti['items']
@@ -264,7 +270,7 @@ def exibe_msg_noti():
             if tokens:
                 for token in tokens:
                     print(token)
-                    enviar_notificacao(token["token"], notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                    enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
                     time.sleep(0.2)
 
 
@@ -272,6 +278,11 @@ def exibe_msg_noti():
     else:
         print("Resposta inesperada:", msgs_da_noti)
 
+            if tokens:
+                for token in tokens:
+                    print(token)
+                    enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                    time.sleep(0.2)
 def run_schedule():
     while True:
         schedule.run_pending()
