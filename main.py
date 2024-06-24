@@ -71,15 +71,11 @@ def get_tokens(id_representante):
         FROM tokens 
         WHERE id_representante = ?
     '''
-    cursor.execute(select_tokens, (id_representante,))
+    cursor.execute(select_tokens, (id_representante))
     tokens = cursor.fetchall()
     conn.close()
 
     return tokens
-
-
-
-
 
 def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')
@@ -149,17 +145,24 @@ def return_all():
     return jsonify(data)
 
 
-@app.route('/register_token', methods=['POST'])
-def register_token():
-    data = request.json
-    print("Data_recives: ", data)
-    if 'token' in data and 'idrep' in data:
-        token = data['token']
-        id_representante = data['idrep']
-        grava_token(id_representante, token)
-        return jsonify({'message': 'Token registered successfully'}), 200
-    else:
-        return jsonify({'error': 'Missing token or representative_id in request'}), 400
+@app.route('/register_token/<id_rep>/<token>', methods=['GET'])
+def register_token(id_rep, token):
+    # data = request.json
+
+    id_repr = id_rep
+    token_fcm = token
+  
+
+    if token_fcm and id_repr:
+        print("Token recebido: ", token_fcm)
+    #     token = data['token']
+    #     id_representante = data['idrep']
+    #     grava_token(id_representante, token)
+    #     return jsonify({"sucess": True}), 200
+    # else:
+    #     return jsonify({'sucess': False}), 400
+        return jsonify({'sucess': True}), 200
+    return jsonify({'sucess': False}), 200
 
 
 @app.route('/write_message/<message>', methods=['GET'])
@@ -260,7 +263,8 @@ def exibe_msg_noti():
             if tokens:
                 for token in tokens:
                     print(token)
-                    # enviar_notificacao(token["token"], notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                    enviar_notificacao(token["token"], notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                    time.sleep(0.2)
 
 
  
@@ -281,4 +285,4 @@ if __name__ == "__main__":
     schedule_thread.start()
 
     # Start the Flask app
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=4000)
