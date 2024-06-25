@@ -150,22 +150,16 @@ def return_all():
 
 @app.route('/register_token/<id_rep>/<token>', methods=['GET'])
 def register_token(id_rep, token):
-    # data = request.json
-
     id_repr = id_rep
     token_fcm = token
-  
-
     if token_fcm and id_repr:
         print("Token recebido: ", token_fcm)
         grava_token(id_repr, token)
         return jsonify({"sucess": True}), 200
     else:
         return jsonify({'sucess': False}), 200
-    #     return jsonify({'sucess': True}), 200
-    # return jsonify({'sucess': False}), 200
-
-
+    
+    
 @app.route('/write_message/<message>', methods=['GET'])
 def write_message(message):
     return jsonify({'message': message})
@@ -266,23 +260,17 @@ def exibe_msg_noti():
         for notif in notifs:
             print(notif)
             id_representante = notif['idrepresentante']
-            tokens = get_tokens(id_representante)
-            if tokens:
-                for token in tokens:
-                    print(token)
-                    enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
-                    time.sleep(0.2)
+            if id_representante:
+                tokens = get_tokens(id_representante)
+                if tokens:
+                    for token in tokens:
+                        print(token)
+                        enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                        time.sleep(0.2) 
+            else:
+                print("Resposta inesperada:", msgs_da_noti)
 
 
- 
-    else:
-        print("Resposta inesperada:", msgs_da_noti)
-
-            if tokens:
-                for token in tokens:
-                    print(token)
-                    enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
-                    time.sleep(0.2)
 def run_schedule():
     while True:
         schedule.run_pending()
@@ -297,4 +285,4 @@ if __name__ == "__main__":
     schedule_thread.start()
 
     # Start the Flask app
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=4000)
