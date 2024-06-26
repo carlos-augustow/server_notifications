@@ -41,20 +41,19 @@ def grava_token(idrep, token):
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
 
-    # Inserindo o representante se ainda não existir
+
     cursor.execute('INSERT OR IGNORE INTO representatives DEFAULT VALUES')
 
-    # Obtendo o id_representante do representante inserido ou existente
+
     cursor.execute('SELECT id_representante FROM representatives ORDER BY id_representante DESC LIMIT 1')
     id_representante = cursor.fetchone()[0]
 
-    # Verificando se o token já existe para o respectivo distribuidor
+
     cursor.execute('SELECT token FROM tokens WHERE id_representante = ? AND token = ?', (idrep, token))
     existing_token = cursor.fetchone()
     if existing_token:
         print("Token já existe para o respectivo distribuidor.")
     else:
-        # Armazenando o token junto com o id_representante na tabela tokens
         armazena_token = '''
         INSERT INTO tokens (token, id_representante)
         VALUES (?, ?)
@@ -84,15 +83,14 @@ def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
     
-    # Fetch column names
+
     cursor.execute('SELECT * FROM tokens')
     column_names = [description[0] for description in cursor.description]
     
-    # Fetch all rows
+
     rows = cursor.fetchall()
     conn.close()
     
-    # Convert rows to list of dictionaries
     result = [dict(zip(column_names, row)) for row in rows]
     
     return result
@@ -159,7 +157,7 @@ def register_token(id_rep, token):
     else:
         return jsonify({'sucess': False}), 200
     
-    
+
 @app.route('/write_message/<message>', methods=['GET'])
 def write_message(message):
     return jsonify({'message': message})
@@ -168,7 +166,7 @@ def write_message(message):
 def send_message(token, title, message):
     if message and token and title:
         enviar_notificacao(token, title, message)
-        # print(retorno)
+
         return jsonify({'message': 'Informations body were recived successfully'}), 200
     else:
         return jsonify({'error': 'Missing informations body request'}), 400
@@ -199,29 +197,38 @@ def enviar_msg(params):
 def enviar_notificacao(token, idmsg, title, mensage):
     resultado = enviar_token(token, idmsg, str(title), str(mensage), None, None)
     print(resultado)
+    if resultado["STATUS_CODE"] == 200:
+        print("########################################")
+        print("Mensagem enviada com sucesso!")
+        print(resultado["STATUS_CODE"])
+        print("########################################")
 
-    if resultado["STATUS_CODE"] != 200:
+    else:
+        print("########################################")
         print("Opa, falhou no envio. Não vou continuar.")
         print(resultado["STATUS_CODE"])
+        print("########################################")
+
 
     time.sleep(2)
 
 
 def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
-    params = {"message": {
-        "data": {
-            "title": TITLE,
-            "body": MESSAGE,
-            "idmsg": str(IDMSG),
-        },
-        "notification": {
-            "title": TITLE,
-            "body": MESSAGE,
-        },
-        "token": TOKEN,
-    }
-    }
+    print("TOKEN: ", str(TOKEN).split("'")[1])
 
+    params = {"message": {
+                    "data": {
+                        "title": TITLE,
+                        "body": MESSAGE,
+                        "idmsg": str(IDMSG),
+                    },
+                    "notification": {
+                        "title": TITLE,
+                        "body": MESSAGE,
+                    },
+                    "token": str(TOKEN).split("'")[1],
+                    }
+                }
     if IMGSRC is not None:
         params["message"]["data"]["imgsrc"] = IMGSRC
         params["notification"]["data"]["image"] = IMGSRC
@@ -231,14 +238,13 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
 
     print("payload: ", params)
 
-   # return enviar_msg(params)
-
+    return enviar_msg(params)
 
 
 def chama_msg_noti():
         try:
             response = requests.get("https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipush")
-            response.raise_for_status()  # Levanta um erro se a requisição falhar
+            response.raise_for_status() 
             return response.json()
         except requests.exceptions.HTTPError as http_err:
             print(f"HTTP error occurred: {http_err}")
@@ -251,14 +257,14 @@ def exibe_msg_noti():
 
     print(retorna_tudo_banco())
 
-
-    
     if 'items' in msgs_da_noti:
         notifs = msgs_da_noti['items']
+        print("######################")
         print(notifs)
+        print("######################")
 
         for notif in notifs:
-            print(notif)
+            # print(notif)
             id_representante = notif['idrepresentante']
             if id_representante:
                 tokens = get_tokens(id_representante)
@@ -279,10 +285,8 @@ def run_schedule():
 schedule.every(10).seconds.do(exibe_msg_noti)
 
 if __name__ == "__main__":
-    # Start the schedule in a separate thread
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.daemon = True
     schedule_thread.start()
-
-    # Start the Flask app
+    
     app.run(debug=True, host="0.0.0.0", port=4000)
