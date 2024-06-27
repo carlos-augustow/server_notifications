@@ -1,0 +1,11 @@
+services:
+  web:
+    container_name: flask
+    build: .
+    volumes: 
+      - .:/app
+    command: >
+        sh -c "python3 main.py"
+    expose:
+      - 4000:4000
+
