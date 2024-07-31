@@ -204,7 +204,7 @@ def enviar_notificacao(token, idmsg, title, mensage, id_representante):
         print("Mensagem enviada com sucesso!")
         print(resultado["STATUS_CODE"])
         try:
-            response = request.get(f"https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipushenv?idrep={id_representante}&idnoti={idmsg}")
+            response = request.put(f"https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipushenv?idrep={id_representante}&idnoti={idmsg}")
             if response["STATUS_CODE"] != 200:
                 print("Erro ao setar mensagem como enviada")
             else:
