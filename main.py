@@ -129,6 +129,17 @@ def delete_db():
     return jsonify({"message": "Banco de dados tokens excluído com sucesso!"}), 200
 
 
+
+
+@app.route('/teste_pedidos/<ids>', methods=['GET'])
+def test(ids):
+    if ids:
+        print((ids))
+        return jsonify({'message': 'ids recebidos com sucesso'}, 200)
+    else:
+        return jsonify({'message': 'Erro'}, 400)
+
+
 @app.route('/delete_token', methods=['POST'])
 def delete():
     data = request.json
@@ -162,15 +173,6 @@ def register_token(id_rep, token):
 def write_message(message):
     return jsonify({'message': message})
 
-@app.route('/send_message/<token>/<title>/<message>', methods=['GET'])
-def send_message(token, title, message):
-    if message and token and title:
-        enviar_notificacao(token, title, message)
-
-        return jsonify({'message': 'Informations body were recived successfully'}), 200
-    else:
-        return jsonify({'error': 'Missing informations body request'}), 400
-
 
 def get_access_token():
     cred = firebase_admin.credentials.Certificate("second-14d46-firebase-adminsdk-egrsc-e857f12342.json")
@@ -194,13 +196,21 @@ def enviar_msg(params):
     return {"STATUS_CODE": r.status_code, "TEXT": r.text}
 
 
-def enviar_notificacao(token, idmsg, title, mensage):
+def enviar_notificacao(token, idmsg, title, mensage, id_representante):
     resultado = enviar_token(token, idmsg, str(title), str(mensage), None, None)
     print(resultado)
     if resultado["STATUS_CODE"] == 200:
         print("########################################")
         print("Mensagem enviada com sucesso!")
         print(resultado["STATUS_CODE"])
+        try:
+            response = request.get(f"https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipushenv?idrep={id_representante}&idnoti={idmsg}")
+            if response["STATUS_CODE"] != 200:
+                print("Erro ao setar mensagem como enviada")
+            else:
+                print("Mensagem setada como enviada")
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")
         print("########################################")
 
     else:
@@ -237,7 +247,7 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
         params["message"]["data"]["url"] = URL
 
     print("payload: ", params)
-
+  
     return enviar_msg(params)
 
 
@@ -271,7 +281,7 @@ def exibe_msg_noti():
                 if tokens:
                     for token in tokens:
                         print(token)
-                        enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'])
+                        enviar_notificacao(token, notif["idnotificacao"], notif['titulo'], notif['mensagem'], id_representante)
                         time.sleep(0.2) 
             else:
                 print("Resposta inesperada:", msgs_da_noti)
@@ -288,4 +298,4 @@ if __name__ == "__main__":
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.daemon = True
     schedule_thread.start()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=4000)
