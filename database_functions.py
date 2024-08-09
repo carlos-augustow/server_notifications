@@ -51,20 +51,46 @@ def grava_token(idrep, token):
     conn.close()
 
 
+# def get_tokens(id_representante):
+#     conn = sqlite3.connect('tokens.db')
+#     cursor = conn.cursor()
+
+#     select_tokens = '''
+#         SELECT token 
+#         FROM tokens 
+#         WHERE id_representante = ?
+#     '''
+#     cursor.execute(select_tokens, (id_representante,))
+#     tokens = cursor.fetchall()
+#     conn.close()
+
+#     return dict(tokens)
+
 def get_tokens(id_representante):
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
 
-    select_tokens = '''
-        SELECT token 
-        FROM tokens 
-        WHERE id_representante = ?
-    '''
-    cursor.execute(select_tokens, (id_representante,))
-    tokens = cursor.fetchall()
-    conn.close()
+    cursor.execute('''
+        SELECT name 
+        FROM sqlite_master 
+        WHERE type='table' AND name='tokens'
+    ''')
+    table_exists = cursor.fetchone()
 
-    return dict(tokens)
+    if table_exists:
+        select_tokens = '''
+            SELECT token 
+            FROM tokens 
+            WHERE id_representante = ?
+        '''
+        cursor.execute(select_tokens, (id_representante,))
+        tokens = cursor.fetchall()
+        conn.close()
+ 
+        return dict(tokens)
+    else:
+        conn.close()
+        return {}  # Retorna um dicionário vazio, por exemplo
 
 def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')

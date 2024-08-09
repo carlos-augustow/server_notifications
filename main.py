@@ -147,7 +147,7 @@ def exibe_msg_noti():
     if 'items' in msgs_da_noti:
         notifs = msgs_da_noti['items']
         print("######################")
-        # print(notifs)
+        print(notifs)
         print("######################")
 
         for notif in notifs:
