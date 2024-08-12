@@ -90,7 +90,7 @@ def get_tokens(id_representante):
         return dict(tokens)
     else:
         conn.close()
-        return {}  # Retorna um dicionário vazio, por exemplo
+        return []
 
 def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')
