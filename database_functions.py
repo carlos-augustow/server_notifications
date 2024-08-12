@@ -66,6 +66,32 @@ def grava_token(idrep, token):
 
 #     return dict(tokens)
 
+# def get_tokens(id_representante):
+#     conn = sqlite3.connect('tokens.db')
+#     cursor = conn.cursor()
+
+#     cursor.execute('''
+#         SELECT name 
+#         FROM sqlite_master 
+#         WHERE type='table' AND name='tokens'
+#     ''')
+#     table_exists = cursor.fetchone()
+
+#     if table_exists:
+#         select_tokens = '''
+#             SELECT token 
+#             FROM tokens 
+#             WHERE id_representante = ?
+#         '''
+#         cursor.execute(select_tokens, (id_representante,))
+#         tokens = cursor.fetchall()
+#         conn.close()
+ 
+#         return dict(tokens)
+#     else:
+#         conn.close()
+#         return []
+
 def get_tokens(id_representante):
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
@@ -87,10 +113,12 @@ def get_tokens(id_representante):
         tokens = cursor.fetchall()
         conn.close()
  
-        return dict(tokens)
+        # Retorna uma lista de tokens ao invés de um dicionário
+        return [token[0] for token in tokens]
     else:
         conn.close()
-        return []
+        return []  # Retorna uma lista vazia
+
 
 def retorna_tudo_banco():
     conn = sqlite3.connect('tokens.db')
