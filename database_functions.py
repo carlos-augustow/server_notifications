@@ -86,8 +86,9 @@ def get_tokens(id_representante):
         cursor.execute(select_tokens, (id_representante,))
         tokens = cursor.fetchall()
         conn.close()
- 
-        return dict(tokens)
+        print({i: token[0] for i, token in enumerate(tokens)})
+        return {i: token[0] for i, token in enumerate(tokens)}
+
     else:
         conn.close()
         return {"vazio": True}
