@@ -155,12 +155,13 @@ def exibe_msg_noti():
             if id_representante:
                 tokens = get_tokens(id_representante)
                 print(f"{tokens}")
-                if tokens:
+                if len(tokens) != 0:
                    for token in tokens:
                         if token['idrepresentante'] == id_representante:   
                             envio = enviar_notificacao(token['token'], notif["idnotificacao"], notif["titulo"], notif["mensagem"])
                             if (envio['sucesso'] == True):
-                                return setando_noti_como_s(id_representante, notif["idnotificacao"])
+                                # return setando_noti_como_s(id_representante, notif["idnotificacao"])
+                                return "sucess"
                             else:
                                return envio
             else:
