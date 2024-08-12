@@ -155,7 +155,7 @@ def exibe_msg_noti():
             if id_representante:
                 tokens = get_tokens(id_representante)
                 print(f"{tokens}")
-                if len(tokens) != 0:
+                if not "vazio" in tokens:
                    for token in tokens:
                         if token['idrepresentante'] == id_representante:   
                             envio = enviar_notificacao(token['token'], notif["idnotificacao"], notif["titulo"], notif["mensagem"])

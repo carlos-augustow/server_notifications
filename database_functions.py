@@ -66,32 +66,6 @@ def grava_token(idrep, token):
 
 #     return dict(tokens)
 
-# def get_tokens(id_representante):
-#     conn = sqlite3.connect('tokens.db')
-#     cursor = conn.cursor()
-
-#     cursor.execute('''
-#         SELECT name 
-#         FROM sqlite_master 
-#         WHERE type='table' AND name='tokens'
-#     ''')
-#     table_exists = cursor.fetchone()
-
-#     if table_exists:
-#         select_tokens = '''
-#             SELECT token 
-#             FROM tokens 
-#             WHERE id_representante = ?
-#         '''
-#         cursor.execute(select_tokens, (id_representante,))
-#         tokens = cursor.fetchall()
-#         conn.close()
- 
-#         return dict(tokens)
-#     else:
-#         conn.close()
-#         return []
-
 def get_tokens(id_representante):
     conn = sqlite3.connect('tokens.db')
     cursor = conn.cursor()
@@ -113,11 +87,37 @@ def get_tokens(id_representante):
         tokens = cursor.fetchall()
         conn.close()
  
-        # Retorna um dicionário com os tokens e seus índices como chaves
-        return {i: token[0] for i, token in enumerate(tokens)}
+        return dict(tokens)
     else:
         conn.close()
-        return {}  # Retorna um dicionário vazio
+        return {"vazio": True}
+
+# def get_tokens(id_representante):
+#     conn = sqlite3.connect('tokens.db')
+#     cursor = conn.cursor()
+
+#     cursor.execute('''
+#         SELECT name 
+#         FROM sqlite_master 
+#         WHERE type='table' AND name='tokens'
+#     ''')
+#     table_exists = cursor.fetchone()
+
+#     if table_exists:
+#         select_tokens = '''
+#             SELECT token 
+#             FROM tokens 
+#             WHERE id_representante = ?
+#         '''
+#         cursor.execute(select_tokens, (id_representante,))
+#         tokens = cursor.fetchall()
+#         conn.close()
+ 
+#         # Retorna um dicionário com os tokens e seus índices como chaves
+#         return {i: token[0] for i, token in enumerate(tokens)}
+#     else:
+#         conn.close()
+#         return {}  # Retorna um dicionário vazio
 
 
 
