@@ -113,11 +113,12 @@ def get_tokens(id_representante):
         tokens = cursor.fetchall()
         conn.close()
  
-        # Retorna uma lista de tokens ao invés de um dicionário
-        return [token[0] for token in tokens]
+        # Retorna um dicionário com os tokens e seus índices como chaves
+        return {i: token[0] for i, token in enumerate(tokens)}
     else:
         conn.close()
-        return []  # Retorna uma lista vazia
+        return {}  # Retorna um dicionário vazio
+
 
 
 def retorna_tudo_banco():
