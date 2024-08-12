@@ -158,6 +158,7 @@ def exibe_msg_noti():
                 if not "vazio" in tokens:
                 #    for token in tokens:
                     for token in tokens.values():
+                        print(token)
                         if token['idrepresentante'] == id_representante:   
                             envio = enviar_notificacao(token['token'], notif["idnotificacao"], notif["titulo"], notif["mensagem"])
                             if (envio['sucesso'] == True):
@@ -180,4 +181,4 @@ if __name__ == "__main__":
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.daemon = True
     schedule_thread.start()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=4000)
