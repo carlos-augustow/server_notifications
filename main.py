@@ -14,6 +14,10 @@ app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": "*"}})
 
+lock = False
+
+idsEnviados = []
+
 @app.route('/delete_db', methods=['GET'])
 def delete_db():
     delete_db_query()
@@ -52,19 +56,6 @@ def get_access_token():
     cred = firebase_admin.credentials.Certificate("second-14d46-firebase-adminsdk-egrsc-e857f12342.json")
     t = cred.get_access_token()
     return t.access_token
-
-
-@app.route("/endpoint_oracle/<idmsg>/<title>/<msg>/<idrep>", methods=['GET'])
-def function_endpoint_oracle(idmsg, title, msg, idrep):
-    if idmsg and title and msg and idrep:
-        tokens = get_tokens(idrep)
-        for token in tokens:
-            if token['idrepresentante'] == idrep:   
-               envio = enviar_notificacao(token['token'], idmsg, title, msg)
-               if (envio['sucesso'] == True):
-                  return setando_noti_como_s(idrep, idmsg)
-               else:
-                   return envio
                
 
 def enviar_msg(params):
@@ -87,22 +78,35 @@ def enviar_notificacao(token, idmsg, title, mensage):
     resultado = enviar_token(token, idmsg, str(title), str(mensage), None, None)
     print(resultado)
     if resultado["STATUS_CODE"] == 200:
-        return jsonify({"sucesso": True})
+        return {"sucesso": True}
     else:
-        return jsonify({"sucesso": False, "msg": resultado.text })
+        return {"sucesso": False, "msg": resultado.text }
 
-def setando_noti_como_s(idrep, idmsg):
-     set_like_s = requests.put(f"https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipushenv?idrep={idrep}&idnoti={idmsg}")
-     if set_like_s.status_code == 200:
-            return jsonify({"sucesso": True})
-     else:
-            return jsonify({"sucesso": False, "msg": set_like_s.text})
+import requests
+
+def setando_enviado(enviados):
+    try:
+        print("entrou")
+        print("enviados: ", enviados)
+        headers = {"Content-Type": "application/json"}
+        response = requests.post("https://desenvolvimento.sistema.romancemoda.com.br/desenv/romance/vol/notipushenv", json=enviados, headers=headers)
+        
+        if response.status_code == 200:
+            return {"sucesso": True}
+        else:
+            print(f"Falha na requisição: {response.status_code} - {response.text}")
+            return {"sucesso": False}
+    
+    except Exception as e:
+        print(f"Erro ao enviar a requisição: {e}")
+        return {"sucesso": False}
+
 
 
 
 
 def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
-    print("TOKEN: ", str(TOKEN).split("'")[1])
+    print("TOKEN: ",  (TOKEN))
 
     params = {"message": {
                     "data": {
@@ -114,14 +118,14 @@ def enviar_token(TOKEN, IDMSG, TITLE, MESSAGE, IMGSRC, URL):
                         "title": TITLE,
                         "body": MESSAGE,
                     },
-                    "token": str(TOKEN).split("'")[1],
+                    "token": TOKEN,
                     }
                 }
-    if IMGSRC is not None:
+    if IMGSRC:
         params["message"]["data"]["imgsrc"] = IMGSRC
         params["notification"]["data"]["image"] = IMGSRC
 
-    if URL is not None:
+    if URL:
         params["message"]["data"]["url"] = URL
 
     print("payload: ", params)
@@ -140,34 +144,84 @@ def chama_msg_noti():
             print(f"Other error occurred: {err}")
 
 
-def exibe_msg_noti():
-    msgs_da_noti = chama_msg_noti()
-    # print(retorna_tudo_banco())
+# def main_func():
 
-    if 'items' in msgs_da_noti:
-        notifs = msgs_da_noti['items']
-        print("######################")
-        print(notifs)
-        print("######################")
+#     for x in range(3):  
+#         if not len(idsEnviados) == 0:  
+#             print("ids: ", idsEnviados)
+#             # retorno = setando_enviado(idsEnviados)
+#             # if retorno == True: 
+#             #     idsEnviados = []
+#             #     break 
 
-        for notif in notifs:
-            id_representante = notif['idrepresentante']
-            if id_representante:
-                tokens = get_tokens(id_representante)
-                print(f"{tokens}")
-                if not "vazio" in tokens:
-                #    for token in tokens:
-                    for token in tokens.values():
-                        print(token)
-                        if token['idrepresentante'] == id_representante:   
-                            envio = enviar_notificacao(token['token'], notif["idnotificacao"], notif["titulo"], notif["mensagem"])
-                            if (envio['sucesso'] == True):
-                                # return setando_noti_como_s(id_representante, notif["idnotificacao"])
-                                return "sucess"
+#     msgs_da_noti = chama_msg_noti()
+
+#     if 'items' in msgs_da_noti:
+#         notifs = msgs_da_noti['items']
+#         print("######################")
+#         print(notifs)
+#         print("######################")
+
+#         for notif in notifs:
+#             id_representante = notif['idrepresentante']
+#             if id_representante:
+#                 tokens = get_tokens(id_representante)
+#                 print(f"{tokens.values()}")
+#                 if not "vazio" in tokens:
+#                 #    for token in tokens:
+#                     for token in tokens.values():  # Agora token é uma string (o token em si)
+#                         envio = enviar_notificacao(token, notif["idnotificacao"], notif["titulo"], notif["mensagem"])
+#                         if envio['sucesso']:
+#                             idsEnviados.append(notif["idnotificacao"])
+#                             return "sucess"
+#                         else:
+#                             return envio
+#             else:
+#                 print("Resposta inesperada:", msgs_da_noti)
+
+
+def main_xfunc():
+    try:
+        global lock
+        if lock: 
+            return
+        lock = True
+        for x in range(3):  
+            if idsEnviados:  # Verifica se idsEnviados não está vazio
+                print("ids: ", idsEnviados)
+                # retorno = setando_enviado(idsEnviados)
+                # if retorno == True: 
+                #     idsEnviados = []
+                #     break 
+                time.sleep(.2)
+
+        msgs_da_noti = chama_msg_noti()
+
+        if 'items' in msgs_da_noti:
+            notifs = msgs_da_noti['items']
+            print("######################")
+            print(notifs)
+            print("######################")
+
+            for notif in notifs:
+                id_representante = notif['idrepresentante']
+                if id_representante:
+                    tokens = get_tokens(id_representante)
+                    print(f"tokens db: {tokens.values()}")
+                    if "vazio" not in tokens:
+                        for token in tokens.values():  # Agora token é uma string (o token em si)
+                            envio = enviar_notificacao(token, notif["idnotificacao"], notif["titulo"], notif["mensagem"])
+                            if envio['sucesso']:
+                                idsEnviados.append({"idnotificacao": notif["idnotificacao"]})
+                                # Não retorna ainda, continue o loop para processar todas as notificações
                             else:
-                               return envio
-            else:
-                print("Resposta inesperada:", msgs_da_noti)
+                                return envio  # Retorna apenas se houver falha
+                else:
+                    print("Resposta inesperada:", msgs_da_noti)
+        lock = False
+        return "Executado"
+    except:
+        lock = False
 
  
 def run_schedule():
@@ -175,7 +229,7 @@ def run_schedule():
         schedule.run_pending()
         time.sleep(1)
 
-schedule.every(10).seconds.do(exibe_msg_noti)
+schedule.every(10).seconds.do(main_xfunc)
 
 if __name__ == "__main__":
     schedule_thread = threading.Thread(target=run_schedule)
