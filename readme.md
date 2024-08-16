@@ -59,40 +59,44 @@ O projeto é constituído por três arquivos principais:
     
     - Fluxo Detalhado da Função main_xfunc():
         A função main_xfunc() é o coração do sistema, coordenando todas as etapas do processo de envio de notificações. Aqui está um detalhamento do seu fluxo:
-            Envio dos IDs de Notificações Já Enviadas (envia_id_noti):
-            A função começa chamando envia_id_noti(), que coleta IDs de notificações já enviadas da base de dados e tenta enviá-los ao servidor externo. Isso é repetido até três vezes em caso de falha.
-            Se os IDs forem enviados com sucesso, a lista de IDs é limpa, garantindo que não haja duplicações em futuras tentativas.
-            Obtenção de Novas Notificações do Servidor (chama_msg_noti):
-            Em seguida, chama_msg_noti() faz uma requisição GET para o servidor externo, tentando obter notificações novas que ainda não foram processadas.
-            Se a resposta for bem-sucedida (status 200) e contiver notificações (items), essas notificações são extraídas e armazenadas no banco de dados local utilizando grava_notificacao().
-            Processamento das Notificações do Banco de Dados (retorna_notificacoes_nao_enviadas): 
-            Após armazenar as notificações obtidas do servidor externo, a função consulta o banco de dados local para recuperar notificações que ainda não foram enviadas (notificações com sent = 0).
-            Se houver notificações não enviadas, a função itera sobre cada uma delas.
-            Envio das Notificações (enviar_notificacao):
-            Para cada notificação não enviada, a função verifica se o representante associado à notificação possui tokens registrados (usando get_tokens()).
-            Se tokens forem encontrados, a notificação é enviada para cada token utilizando enviar_notificacao().
-            Se o envio for bem-sucedido, a notificação é marcada como enviada no banco de dados (usando atualiza_notificacao_sent()).
-            Caso não haja tokens, é registrado um aviso no log de que o representante não possui tokens.
+		
+     -   Envio dos IDs de Notificações Já Enviadas (envia_id_noti):
+       
+	   1. A função começa chamando envia_id_noti(), que coleta IDs de notificações já enviadas da base de dados e tenta enviá-los ao servidor externo. Isso é repetido até três vezes em caso de falha.
+	   2.   Se os IDs forem enviados com sucesso, a lista de IDs é limpa, garantindo que não haja duplicações em futuras tentativas.
+      - Obtenção de Novas Notificações do Servidor (chama_msg_noti):
+         1. Em seguida, chama_msg_noti() faz uma requisição GET para o servidor externo, tentando obter notificações novas que ainda não foram processadas.
+         2.  Se a resposta for bem-sucedida (status 200) e contiver notificações (items), essas notificações são extraídas e armazenadas no banco de dados local utilizando grava_notificacao().
+         3. 	Processamento das Notificações do Banco de Dados (retorna_notificacoes_nao_enviadas): 
+         4. 	 Após armazenar as notificações obtidas do servidor externo, a função consulta o banco de dados local para recuperar notificações que ainda não foram enviadas (notificações com sent = 0).
+         5. 	Se houver notificações não enviadas, a função itera sobre cada uma delas.
+         6.   	Envio das Notificações (enviar_notificacao):
+         7.   	Para cada notificação não enviada, a função verifica se o representante associado à notificação possui tokens registrados (usando get_tokens()).
+     	8.    Se tokens forem encontrados, a notificação é enviada para cada token utilizando enviar_notificacao().
+	 	9.    	Se o envio for bem-sucedido, a notificação é marcada como enviada no banco de dados (usando atualiza_notificacao_sent()).
+     	10. 	Caso não haja tokens, é registrado um aviso no log de que o representante não possui tokens.
 
         Finalização:
-            A função retorna "Executado" se todo o processo for completado sem erros. Se ocorrer algum erro durante o processo, ele é capturado e registrado nos logs.
+           A função retorna "Executado" se todo o processo for completado sem erros. Se ocorrer algum erro durante o processo, ele é capturado e registrado nos logs.
 
         Execução:
-            run_schedule(): A função run_schedule() mantém o agendamento contínuo da main_xfunc() a cada 10 segundos, garantindo que o processo de envio de notificações seja automatizado e contínuo.
-            if __name__ == "__main__":: Quando o script é executado diretamente, ele inicializa o agendamento (run_schedule()) e inicia a API Flask na porta indicada, pronta para receber requisições externas.
+           run_schedule(): A função run_schedule() mantém o agendamento contínuo da main_xfunc() a cada 10 segundos, garantindo que o processo de envio de notificações seja automatizado e contínuo.
+           if __name__ == "__main__":: Quando o script é executado diretamente, ele inicializa o agendamento (run_schedule()) e inicia a API Flask na porta indicada, pronta para receber requisições externas.
 
 2. Arquivo endpoints.py
 
 **Este script contém a implementação de uma API Flask que permite operações CRUD (Create, Read, Update, Delete) sobre o banco de dados de tokens.**
-    Principais Endpoints:
-        - /delete_db (GET): Deleta a tabela de tokens no banco de dados, essencialmente limpando todos os registros armazenados.
-        - /delete_token (POST): Recebe um ID de representante no corpo da requisição e deleta todos os tokens associados a esse ID.
-        - /return_all (GET): Retorna todos os tokens armazenados no banco de dados em formato JSON.
-        - /register_token/<id_rep>/<token> (GET): Registra um novo token para um representante específico, identificados pelos parâmetros da URL.
-        _
-         Execução:
-            run_schedule(): A função run_schedule() mantém o agendamento contínuo da main_xfunc() a cada 10 segundos, garantindo que o processo de envio de notificações seja automatizado e contínuo.
-            if __name__ == "__main__":: Quando o script é executado diretamente, ele inicializa o agendamento (run_schedule()) e inicia a API Flask na porta indicada, pronta para receber requisições externas.
+
+Principais Endpoints:
+   - /delete_db (GET): Deleta a tabela de tokens no banco de dados, essencialmente limpando todos os registros armazenados.
+   - /delete_token (POST): Recebe um ID de representante no corpo da requisição e deleta todos os tokens associados a esse ID.
+   - /return_all (GET): Retorna todos os tokens armazenados no banco de dados em formato JSON.
+   - /register_token/<id_rep>/<token> (GET): Registra um novo token para um representante específico, identificados pelos parâmetros da URL.
+   
+   
+   Execução:
+   - run_schedule(): A função run_schedule() mantém o agendamento contínuo da main_xfunc() a cada 10 segundos, garantindo que o processo de envio de notificações seja automatizado e contínuo.
+   - if __name__ == "__main__":: Quando o script é executado diretamente, ele inicializa o agendamento (run_schedule()) e inicia a API Flask na porta indicada, pronta para receber requisições externas.
 
     
 3. Arquivo database_functions.py
@@ -118,44 +122,50 @@ O projeto é constituído por três arquivos principais:
     O banco de dados utilizado neste sistema é um banco de dados SQLite, que é um sistema de gerenciamento de banco de dados leve e autônomo. SQLite é particularmente útil para aplicações que requerem um banco de dados embutido, com pouca complexidade, e sem a necessidade de um servidor de banco de dados separado. Este banco de dados é usado para armazenar tokens de dispositivos e informações sobre notificações push, facilitando o gerenciamento e o envio de notificações.
 
 Estrutura das Tabelas
-        O banco de dados SQLite é composto por duas tabelas principais:
-            - Tabela tokens    
-                Propósito: Armazenar os tokens do Firebase Cloud Messaging (FCM) associados aos representantes (usuários) da aplicação.
-                Estrutura:
-                    _
-                    id_token (INTEGER PRIMARY KEY AUTOINCREMENT): Chave primária, autoincremental, que identifica de forma única cada registro de token.
-                    token (TEXT NOT NULL): Token FCM que será utilizado para enviar notificações push ao dispositivo específico.
-                    _
-                    id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em                            múltiplos dispositivos.
-            _
-            - Tabela notifications
-                Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas
-                Estrutura:
-                    idnotificacao (INTEGER PRIMARY KEY): Identificador único da notificação.
-                    idrepresentante (INTEGER): Identificador do representante que deve receber a notificação.
-                    titulo (TEXT): Título da notificação.
-                    mensagem (TEXT): Corpo da mensagem da notificação.
-                    sent (INTEGER): Indicador de status que mostra se a notificação foi enviada (0 para não enviada, 1 para enviada).
-                    _    
-                    Processo de Construção do Banco de Dados
-                    A construção do banco de dados é realizada através da função create_db() no arquivo database_functions.py. Aqui está um detalhamento desse processo:
+ O banco de dados SQLite é composto por duas tabelas principais:
+   - Tabela tokens
+>    Propósito: Armazenar os tokens do Firebase Cloud Messaging (FCM) associados aos representantes (usuários) da aplicação.
+
+ Estrutura:
+  -  id_token (INTEGER PRIMARY KEY AUTOINCREMENT): Chave primária, autoincremental, que identifica de forma única cada registro de token.
+  - token (TEXT NOT NULL): Token FCM que será utilizado para enviar notificações push ao dispositivo específico.
+- id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em múltiplos dispositivos.
+
+Tabela notifications:
+> Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas                Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas
+
+Estrutura:
+- idnotificacao (INTEGER PRIMARY KEY): Identificador único da notificação.
+- idrepresentante (INTEGER): Identificador do representante que deve receber a notificação.
+- titulo (TEXT): Título da notificação.
+- mensagem (TEXT): Corpo da mensagem da notificação.
+- sent (INTEGER): Indicador de status que mostra se a notificação foi enviada (0 para não enviada, 1 para enviada).
+ 
+*Processo de Construção do Banco de Dados *
+
+ A construção do banco de dados é realizada através da função create_db() no arquivo database_functions.py. Aqui está um detalhamento desse processo:
                 
-Conexão com o Banco de Dados:
-    A função create_db() inicia estabelecendo uma conexão com o banco de dados SQLite utilizando sqlite3.connect('tokens.db'). Se o banco de dados tokens.db não existir, ele será criado automaticamente.
-    Um cursor (cursor) é então criado a partir da conexão. Esse cursor é utilizado para executar comandos SQL.
-    Criação da Tabela tokens:
-        Um comando SQL CREATE TABLE IF NOT EXISTS tokens é executado para criar a tabela tokens caso ela ainda não exista.
-        O comando define os campos id_token, token, e id_representante, conforme explicado acima. A cláusula PRIMARY KEY AUTOINCREMENT garante que cada registro tenha um identificador único e que este seja automaticamente incrementado.
-    Criação da Tabela notifications:
-        Similarmente, um comando SQL CREATE TABLE IF NOT EXISTS notifications é executado para criar a tabela notifications se ela não existir.
-        Os campos idnotificacao, idrepresentante, titulo, mensagem, e sent são definidos, com idnotificacao sendo a chave primária.
+- Conexão com o Banco de Dados:
+
+	A função create_db() inicia estabelecendo uma conexão com o banco de dados SQLite utilizando sqlite3.connect('tokens.db'). Se o banco de dados tokens.db não existir, ele será criado automaticamente.
+ 
+ Um cursor (cursor) é então criado a partir da conexão. Esse cursor é utilizado para executar comandos SQL.
+
+- Criação da Tabela tokens:
+	Um comando SQL CREATE TABLE IF NOT EXISTS tokens é executado para criar a tabela tokens caso ela ainda não exista.
+  - O comando define os campos id_token, token, e id_representante, conforme explicado acima. A cláusula PRIMARY KEY AUTOINCREMENT garante que cada registro tenha um identificador único e que este seja automaticamente incrementado.
+   
+   
+   - Criação da Tabela notifications:
+    Similarmente, um comando SQL CREATE TABLE IF NOT EXISTS notifications é executado para criar a tabela notifications se ela não existir.
+  - Os campos idnotificacao, idrepresentante, titulo, mensagem, e sent são definidos, com idnotificacao sendo a chave primária.
     Finalização:
-        Após a execução dos comandos SQL, a função chama conn.commit() para confirmar as alterações no banco de dados, garantindo que as tabelas sejam efetivamente criadas.
-        Finalmente, a conexão com o banco de dados é encerrada com conn.close(), liberando os recursos.
+ - Após a execução dos comandos SQL, a função chama conn.commit() para confirmar as alterações no banco de dados, garantindo que as tabelas sejam efetivamente criadas.
+ - Finalmente, a conexão com o banco de dados é encerrada com conn.close(), liberando os recursos.
 
 Manipulação e Uso das Tabelas:
-    Uma vez criadas, as tabelas tokens e notifications são manipuladas por várias funções dentro do sistema:
-    - Inserção de Dados:
+ Uma vez criadas, as tabelas tokens e notifications são manipuladas por várias funções dentro do sistema:
+   - Inserção de Dados:
         Tokens são inseridos na tabela tokens através da função grava_token(idrep, token).
         Notificações são inseridas na tabela notifications através da função grava_notificacao(idnotificacao, idrepresentante, titulo, mensagem).
         - Consulta de Dados:
@@ -170,11 +180,11 @@ Manipulação e Uso das Tabelas:
        - Notificações enviadas podem ser excluídas com a função exclui_notificacoes_enviadas().
 
 Considerações de Design
-    - Chave Primária:  Ambas as tabelas utilizam chaves primárias (id_token e idnotificacao), que garantem a unicidade dos registros e facilitam consultas e operações de atualização/exclusão.
-    - Associação entre Tabelas: A tabela notifications utiliza idreprsentante para associar notificações a representantes específicos. Este campo é crucial para o sistema, pois permite enviar notificações apenas para os representantes corretos.
+   - Chave Primária:  Ambas as tabelas utilizam chaves primárias (id_token e idnotificacao), que garantem a unicidade dos registros e facilitam consultas e operações de atualização/exclusão.
+   - Associação entre Tabelas: A tabela notifications utiliza idreprsentante para associar notificações a representantes específicos. Este campo é crucial para o sistema, pois permite enviar notificações apenas para os representantes corretos.
         
 Simplicidade e Eficiência: 
-    O uso de SQLite é apropriado para este tipo de aplicação onde a simplicidade, baixo custo de setup e manutenção são críticos. SQLite oferece uma solução robusta sem a complexidade de sistemas de banco de dados maiores como MySQL ou PostgreSQL.
+ O uso de SQLite é apropriado para este tipo de aplicação onde a simplicidade, baixo custo de setup e manutenção são críticos. SQLite oferece uma solução robusta sem a complexidade de sistemas de banco de dados maiores como MySQL ou PostgreSQL.
 
 ---------------------------
 
