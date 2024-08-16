@@ -17,7 +17,7 @@ Tecnologias utilizadas
 |Flask     |3.0.3         |
 |Flask-Cors     |4.0.1         |
 |firebase-admin     |6.5.0         |
-|schedule     |         |1.2.2
+|schedule     |1.2.2         |
 |sqlite     |3         |
 
 ---------------------------
@@ -122,9 +122,11 @@ Estrutura das Tabelas
             - Tabela tokens    
                 Propósito: Armazenar os tokens do Firebase Cloud Messaging (FCM) associados aos representantes (usuários) da aplicação.
                 Estrutura:
+                    _
                     id_token (INTEGER PRIMARY KEY AUTOINCREMENT): Chave primária, autoincremental, que identifica de forma única cada registro de token.
                     token (TEXT NOT NULL): Token FCM que será utilizado para enviar notificações push ao dispositivo específico.
-                    id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em múltiplos dispositivos.
+                    _
+                    id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em                            múltiplos dispositivos.
             _
             - Tabela notifications
                 Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas
