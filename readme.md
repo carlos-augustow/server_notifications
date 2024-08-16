@@ -136,82 +136,66 @@ O projeto é constituído por três arquivos principais:
 Arquitetura e Construção do Banco de Dados
     O banco de dados utilizado neste sistema é um banco de dados SQLite, que é um sistema de gerenciamento de banco de dados leve e autônomo. SQLite é particularmente útil para aplicações que requerem um banco de dados embutido, com pouca complexidade, e sem a necessidade de um servidor de banco de dados separado. Este banco de dados é usado para armazenar tokens de dispositivos e informações sobre notificações push, facilitando o gerenciamento e o envio de notificações.
 
-    Estrutura das Tabelas
+ Estrutura das Tabelas
         O banco de dados SQLite é composto por duas tabelas principais:
 
-    Tabela tokens
+Tabela tokens
 
-        Propósito: 
-            Armazenar os tokens do Firebase Cloud Messaging (FCM) associados aos representantes (usuários) da aplicação.
+Propósito: 
+    Armazenar os tokens do Firebase Cloud Messaging (FCM) associados aos representantes (usuários) da aplicação.
 
-        Estrutura:
-            id_token (INTEGER PRIMARY KEY AUTOINCREMENT): Chave primária, autoincremental, que identifica de forma única cada registro de token.
-            token (TEXT NOT NULL): Token FCM que será utilizado para enviar notificações push ao dispositivo específico.
-            id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em múltiplos dispositivos.
+Estrutura:
+    id_token (INTEGER PRIMARY KEY AUTOINCREMENT): Chave primária, autoincremental, que identifica de forma única cada registro de token.
+    token (TEXT NOT NULL): Token FCM que será utilizado para enviar notificações push ao dispositivo específico.
+    id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em múltiplos dispositivos.
 
-    Tabela notifications
+Tabela notifications
 
-    Propósito: 
-        Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas.
+Propósito: 
+    Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas.
 
-    Estrutura:
-        idnotificacao (INTEGER PRIMARY KEY): Identificador único da notificação.
-        idrepresentante (INTEGER): Identificador do representante que deve receber a notificação.
-        titulo (TEXT): Título da notificação.
-        mensagem (TEXT): Corpo da mensagem da notificação.
-        sent (INTEGER): Indicador de status que mostra se a notificação foi enviada (0 para não enviada, 1 para enviada).
-        Processo de Construção do Banco de Dados
-        A construção do banco de dados é realizada através da função create_db() no arquivo database_functions.py. Aqui está um detalhamento desse processo:
+Estrutura:
+    idnotificacao (INTEGER PRIMARY KEY): Identificador único da notificação.
+    idrepresentante (INTEGER): Identificador do representante que deve receber a notificação.
+    titulo (TEXT): Título da notificação.
+    mensagem (TEXT): Corpo da mensagem da notificação.
+    sent (INTEGER): Indicador de status que mostra se a notificação foi enviada (0 para não enviada, 1 para enviada).
+    Processo de Construção do Banco de Dados
+    A construção do banco de dados é realizada através da função create_db() no arquivo database_functions.py. Aqui está um detalhamento desse processo:
 
-        Conexão com o Banco de Dados:
-
-        A função create_db() inicia estabelecendo uma conexão com o banco de dados SQLite utilizando sqlite3.connect('tokens.db'). Se o banco de dados tokens.db não existir, ele será criado automaticamente.
-        Um cursor (cursor) é então criado a partir da conexão. Esse cursor é utilizado para executar comandos SQL.
-        Criação da Tabela tokens:
-
+Conexão com o Banco de Dados:
+    A função create_db() inicia estabelecendo uma conexão com o banco de dados SQLite utilizando sqlite3.connect('tokens.db'). Se o banco de dados tokens.db não existir, ele será criado automaticamente.
+    Um cursor (cursor) é então criado a partir da conexão. Esse cursor é utilizado para executar comandos SQL.
+    Criação da Tabela tokens:
         Um comando SQL CREATE TABLE IF NOT EXISTS tokens é executado para criar a tabela tokens caso ela ainda não exista.
         O comando define os campos id_token, token, e id_representante, conforme explicado acima. A cláusula PRIMARY KEY AUTOINCREMENT garante que cada registro tenha um identificador único e que este seja automaticamente incrementado.
-
-        Criação da Tabela notifications:
-
-            Similarmente, um comando SQL CREATE TABLE IF NOT EXISTS notifications é executado para criar a tabela notifications se ela não existir.
-            Os campos idnotificacao, idrepresentante, titulo, mensagem, e sent são definidos, com idnotificacao sendo a chave primária.
-            Finalização:
-
+    Criação da Tabela notifications:
+        Similarmente, um comando SQL CREATE TABLE IF NOT EXISTS notifications é executado para criar a tabela notifications se ela não existir.
+        Os campos idnotificacao, idrepresentante, titulo, mensagem, e sent são definidos, com idnotificacao sendo a chave primária.
+    Finalização:
         Após a execução dos comandos SQL, a função chama conn.commit() para confirmar as alterações no banco de dados, garantindo que as tabelas sejam efetivamente criadas.
         Finalmente, a conexão com o banco de dados é encerrada com conn.close(), liberando os recursos.
 
-        Manipulação e Uso das Tabelas 
-
-            Uma vez criadas, as tabelas tokens e notifications são manipuladas por várias funções dentro do sistema:
-
-            Inserção de Dados:
-
+Manipulação e Uso das Tabelas 
+    Uma vez criadas, as tabelas tokens e notifications são manipuladas por várias funções dentro do sistema:
+    Inserção de Dados:
         Tokens são inseridos na tabela tokens através da função grava_token(idrep, token).
         Notificações são inseridas na tabela notifications através da função grava_notificacao(idnotificacao, idrepresentante, titulo, mensagem).
         Consulta de Dados:
-
             Tokens associados a um representante específico são recuperados usando a função get_tokens(id_representante).
             Notificações que não foram enviadas são recuperadas usando a função retorna_notificacoes_nao_enviadas().
             Notificações que já foram enviadas são recuperadas usando a função retorna_ids_notificacoes_enviadas().
-
         Atualização de Dados:
-
-        O status de uma notificação é atualizado para sent = 1 após o envio bem-sucedido usando a função atualiza_notificacao_sent(idnotificacao).
-
+            O status de uma notificação é atualizado para sent = 1 após o envio bem-sucedido usando a função atualiza_notificacao_sent(idnotificacao).
         Exclusão de Dados:
-
             Tokens podem ser excluídos usando a função delete_token(id_representante).
             Tabelas inteiras podem ser excluídas (como a tabela tokens) usando a função delete_db_query().
             Notificações enviadas podem ser excluídas com a função exclui_notificacoes_enviadas().
-
     Considerações de Design
         Chave Primária: 
             Ambas as tabelas utilizam chaves primárias (id_token e idnotificacao), que garantem a unicidade dos registros e facilitam consultas e operações de atualização/exclusão.
-
         Associação entre Tabelas: 
             A tabela notifications utiliza idrepresentante para associar notificações a representantes específicos. Este campo é crucial para o sistema, pois permite enviar notificações apenas para os representantes corretos.
-
     Simplicidade e Eficiência: 
         O uso de SQLite é apropriado para este tipo de aplicação onde a simplicidade, baixo custo de setup e manutenção são críticos. SQLite oferece uma solução robusta sem a complexidade de sistemas de banco de dados maiores como MySQL ou PostgreSQL.
 
