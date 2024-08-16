@@ -166,38 +166,50 @@ Estrutura:
 Conexão com o Banco de Dados:
     A função create_db() inicia estabelecendo uma conexão com o banco de dados SQLite utilizando sqlite3.connect('tokens.db'). Se o banco de dados tokens.db não existir, ele será criado automaticamente.
     Um cursor (cursor) é então criado a partir da conexão. Esse cursor é utilizado para executar comandos SQL.
+    
     Criação da Tabela tokens:
+
         Um comando SQL CREATE TABLE IF NOT EXISTS tokens é executado para criar a tabela tokens caso ela ainda não exista.
         O comando define os campos id_token, token, e id_representante, conforme explicado acima. A cláusula PRIMARY KEY AUTOINCREMENT garante que cada registro tenha um identificador único e que este seja automaticamente incrementado.
+   
     Criação da Tabela notifications:
         Similarmente, um comando SQL CREATE TABLE IF NOT EXISTS notifications é executado para criar a tabela notifications se ela não existir.
         Os campos idnotificacao, idrepresentante, titulo, mensagem, e sent são definidos, com idnotificacao sendo a chave primária.
+  
     Finalização:
         Após a execução dos comandos SQL, a função chama conn.commit() para confirmar as alterações no banco de dados, garantindo que as tabelas sejam efetivamente criadas.
         Finalmente, a conexão com o banco de dados é encerrada com conn.close(), liberando os recursos.
 
-Manipulação e Uso das Tabelas 
+Manipulação e Uso das Tabelas:
     Uma vez criadas, as tabelas tokens e notifications são manipuladas por várias funções dentro do sistema:
+    
     Inserção de Dados:
         Tokens são inseridos na tabela tokens através da função grava_token(idrep, token).
         Notificações são inseridas na tabela notifications através da função grava_notificacao(idnotificacao, idrepresentante, titulo, mensagem).
+       
         Consulta de Dados:
             Tokens associados a um representante específico são recuperados usando a função get_tokens(id_representante).
             Notificações que não foram enviadas são recuperadas usando a função retorna_notificacoes_nao_enviadas().
             Notificações que já foram enviadas são recuperadas usando a função retorna_ids_notificacoes_enviadas().
+        
         Atualização de Dados:
             O status de uma notificação é atualizado para sent = 1 após o envio bem-sucedido usando a função atualiza_notificacao_sent(idnotificacao).
+        
         Exclusão de Dados:
             Tokens podem ser excluídos usando a função delete_token(id_representante).
             Tabelas inteiras podem ser excluídas (como a tabela tokens) usando a função delete_db_query().
             Notificações enviadas podem ser excluídas com a função exclui_notificacoes_enviadas().
-    Considerações de Design
+    
+Considerações de Design
+
         Chave Primária: 
             Ambas as tabelas utilizam chaves primárias (id_token e idnotificacao), que garantem a unicidade dos registros e facilitam consultas e operações de atualização/exclusão.
+        
         Associação entre Tabelas: 
             A tabela notifications utiliza idrepresentante para associar notificações a representantes específicos. Este campo é crucial para o sistema, pois permite enviar notificações apenas para os representantes corretos.
-    Simplicidade e Eficiência: 
-        O uso de SQLite é apropriado para este tipo de aplicação onde a simplicidade, baixo custo de setup e manutenção são críticos. SQLite oferece uma solução robusta sem a complexidade de sistemas de banco de dados maiores como MySQL ou PostgreSQL.
+        
+Simplicidade e Eficiência: 
+    O uso de SQLite é apropriado para este tipo de aplicação onde a simplicidade, baixo custo de setup e manutenção são críticos. SQLite oferece uma solução robusta sem a complexidade de sistemas de banco de dados maiores como MySQL ou PostgreSQL.
 
 ---------------------------
 
