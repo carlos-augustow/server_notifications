@@ -1,4 +1,4 @@
-Serviço de Notificações Push para o app Vendas Plus 
+Serviço de Notificações Push - App Vendas Plus 
 
 Esse serviço é responsável por:
 
