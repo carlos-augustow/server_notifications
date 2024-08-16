@@ -6,7 +6,7 @@ import schedule
 import logging
 from flask_cors import CORS
 from flask import Flask
-from database_functions import grava_token, get_tokens, retorna_ids_notificacoes_enviadas, grava_notificacao, retorna_notificacoes_nao_enviadas, atualiza_notificacao_sent
+from database_functions import get_tokens, retorna_ids_notificacoes_enviadas, grava_notificacao, retorna_notificacoes_nao_enviadas, atualiza_notificacao_sent
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": "*"}})
