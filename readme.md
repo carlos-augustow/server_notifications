@@ -67,19 +67,19 @@ O projeto é constituído por três arquivos principais:
       - Obtenção de Novas Notificações do Servidor (chama_msg_noti):
          1. Em seguida, chama_msg_noti() faz uma requisição GET para o servidor externo, tentando obter notificações novas que ainda não foram processadas.
          2.  Se a resposta for bem-sucedida (status 200) e contiver notificações (items), essas notificações são extraídas e armazenadas no banco de dados local utilizando grava_notificacao().
-         3. 	Processamento das Notificações do Banco de Dados (retorna_notificacoes_nao_enviadas): 
-         4. 	 Após armazenar as notificações obtidas do servidor externo, a função consulta o banco de dados local para recuperar notificações que ainda não foram enviadas (notificações com sent = 0).
-         5. 	Se houver notificações não enviadas, a função itera sobre cada uma delas.
-         6.   	Envio das Notificações (enviar_notificacao):
-         7.   	Para cada notificação não enviada, a função verifica se o representante associado à notificação possui tokens registrados (usando get_tokens()).
-     	8.    Se tokens forem encontrados, a notificação é enviada para cada token utilizando enviar_notificacao().
-	 	9.    	Se o envio for bem-sucedido, a notificação é marcada como enviada no banco de dados (usando atualiza_notificacao_sent()).
-     	10. 	Caso não haja tokens, é registrado um aviso no log de que o representante não possui tokens.
+         3.    Processamento das Notificações do Banco de Dados (retorna_notificacoes_nao_enviadas): 
+         4.    Após armazenar as notificações obtidas do servidor externo, a função consulta o banco de dados local para recuperar notificações que ainda não foram enviadas (notificações com sent = 0).
+         5.    Se houver notificações não enviadas, a função itera sobre cada uma delas.
+         6.    Envio das Notificações (enviar_notificacao):
+         7.    Para cada notificação não enviada, a função verifica se o representante associado à notificação possui tokens registrados (usando get_tokens()).
+     	 8.    Se tokens forem encontrados, a notificação é enviada para cada token utilizando enviar_notificacao().
+	 	 9.    Se o envio for bem-sucedido, a notificação é marcada como enviada no banco de dados (usando atualiza_notificacao_sent()).
+     	 10.   Caso não haja tokens, é registrado um aviso no log de que o representante não possui tokens.
 
-        Finalização:
-           A função retorna "Executado" se todo o processo for completado sem erros. Se ocorrer algum erro durante o processo, ele é capturado e registrado nos logs.
+    Finalização:
+    A função retorna "Executado" se todo o processo for completado sem erros. Se ocorrer algum erro durante o processo, ele é capturado e registrado nos logs.
 
-        Execução:
+    Execução:
            run_schedule(): A função run_schedule() mantém o agendamento contínuo da main_xfunc() a cada 10 segundos, garantindo que o processo de envio de notificações seja automatizado e contínuo.
            if __name__ == "__main__":: Quando o script é executado diretamente, ele inicializa o agendamento (run_schedule()) e inicia a API Flask na porta indicada, pronta para receber requisições externas.
 
