@@ -145,7 +145,7 @@ Estrutura:
 - mensagem (TEXT): Corpo da mensagem da notificação.
 - sent (INTEGER): Indicador de status que mostra se a notificação foi enviada (0 para não enviada, 1 para enviada).
  
-*Processo de Construção do Banco de Dados *
+*Processo de Construção do Banco de Dados*
 
  A construção do banco de dados é realizada através da função create_db() no arquivo database_functions.py. Aqui está um detalhamento desse processo:
                 
