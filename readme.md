@@ -60,10 +60,11 @@ O projeto é constituído por três arquivos principais:
     - Fluxo Detalhado da Função main_xfunc():
         A função main_xfunc() é o coração do sistema, coordenando todas as etapas do processo de envio de notificações. Aqui está um detalhamento do seu fluxo:
 		
-     -   Envio dos IDs de Notificações Já Enviadas (envia_id_noti):
-       
-	   1. A função começa chamando envia_id_noti(), que coleta IDs de notificações já enviadas da base de dados e tenta enviá-los ao servidor externo. Isso é repetido até três vezes em caso de falha.
-	   2.   Se os IDs forem enviados com sucesso, a lista de IDs é limpa, garantindo que não haja duplicações em futuras tentativas.
+     -   Envio dos IDs de Notificações Já Enviadas (envia_id_noti):       
+	   
+       1. A função começa chamando envia_id_noti(), que coleta IDs de notificações já enviadas da base de dados e tenta enviá-los ao servidor externo. Isso é repetido até três vezes em caso de falha.
+	   2. Se os IDs forem enviados com sucesso, a lista de IDs é limpa, garantindo que não haja duplicações em futuras tentativas.
+
       - Obtenção de Novas Notificações do Servidor (chama_msg_noti):
          1. Em seguida, chama_msg_noti() faz uma requisição GET para o servidor externo, tentando obter notificações novas que ainda não foram processadas.
          2.  Se a resposta for bem-sucedida (status 200) e contiver notificações (items), essas notificações são extraídas e armazenadas no banco de dados local utilizando grava_notificacao().
