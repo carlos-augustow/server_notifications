@@ -132,7 +132,7 @@ Estrutura das Tabelas
 - id_representante (INTEGER): Identificador do representante ao qual o token está associado. Isso permite que múltiplos tokens sejam associados a um único representante, suportando cenários onde o usuário pode estar logado em múltiplos dispositivos.
 
 Tabela notifications:
-> Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas                Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas
+> Propósito: Armazenar informações sobre as notificações push que devem ser enviadas ou já foram enviadas
 
 Estrutura:
 - idnotificacao (INTEGER PRIMARY KEY): Identificador único da notificação.
