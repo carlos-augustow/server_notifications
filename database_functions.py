@@ -1,7 +1,15 @@
-import sqlite3 
+import os
+import sqlite3
+
+def get_db_path():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_dir, 'tokens.db')
+
 def create_db():
-    conn = sqlite3.connect('tokens.db')
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+    
     create_table_tokens_sql = '''
         CREATE TABLE IF NOT EXISTS tokens (
             id_token INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,19 +31,24 @@ def create_db():
     conn.commit()
     conn.close()
 
+
+
 def grava_notificacao(idnotificacao, idrepresentante, titulo, mensagem):
-    create_db()
-    conn = sqlite3.connect('tokens.db')
+    create_db()  # Opcional se já for chamado no início, mas garante redundância
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute('SELECT * FROM notifications WHERE idnotificacao = ? AND idrepresentante = ? AND titulo = ? AND mensagem = ? AND sent = ?', 
-                   (idnotificacao, idrepresentante, titulo, mensagem, 0))
+    cursor.execute(
+        'SELECT * FROM notifications WHERE idnotificacao = ? AND idrepresentante = ? AND titulo = ? AND mensagem = ? AND sent = ?', 
+        (idnotificacao, idrepresentante, titulo, mensagem, 0)
+    )
     existing_notificacao = cursor.fetchone()
 
     if not existing_notificacao:
         armazena_notificacao = '''
-        INSERT INTO notifications (idnotificacao, idrepresentante, titulo, mensagem, sent)
-        VALUES (?, ?, ?, ?, ?)
+            INSERT INTO notifications (idnotificacao, idrepresentante, titulo, mensagem, sent)
+            VALUES (?, ?, ?, ?, ?)
         '''
         cursor.execute(armazena_notificacao, (idnotificacao, idrepresentante, titulo, mensagem, 0))
     

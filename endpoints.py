@@ -15,15 +15,14 @@ def delete_db():
     delete_db_query()
     return jsonify({"message": "Banco de dados tokens excluído com sucesso!"}), 200
 
-@app.route('/delete_token', methods=['POST'])
-def delete():
-    data = request.json
-    if 'idrep' in data:
-        id = data['idrep']
-        delete_token(id)
-        return jsonify({'message': 'Deletado com sucesso!'}, 200)
+
+@app.route('/delete_token/<idrep>', methods=['GET'])
+def delete(idrep):
+    if idrep:
+        delete_token(idrep)
+        return jsonify({'message': 'Deletado com sucesso!'}), 200
     else:
-        return jsonify({'message': 'Erro ao deletar'}, 400)
+        return jsonify({'message': 'Erro ao deletar'}), 400
 
 @app.route('/return_all', methods=['GET'])
 def return_all():

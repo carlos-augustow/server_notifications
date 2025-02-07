@@ -1,3 +1,4 @@
+import threading
 import requests
 import urllib3
 import time
@@ -6,7 +7,7 @@ import schedule
 import logging
 from flask_cors import CORS
 from flask import Flask
-from database_functions import get_tokens, retorna_ids_notificacoes_enviadas, grava_notificacao, retorna_notificacoes_nao_enviadas, atualiza_notificacao_sent
+from database_functions import create_db, get_tokens, retorna_ids_notificacoes_enviadas, grava_notificacao, retorna_notificacoes_nao_enviadas, atualiza_notificacao_sent
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": "*"}})
@@ -14,7 +15,7 @@ CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_access_token():
-    cred = firebase_admin.credentials.Certificate("second-14d46-firebase-adminsdk-egrsc-e857f12342.json")
+    cred = firebase_admin.credentials.Certificate("appvendasplus-599f31933fe7.json")
     t = cred.get_access_token()
     return t.access_token
 
@@ -32,7 +33,7 @@ def enviar_msg(params, idmsg):
 
         urllib3.disable_warnings()
 
-        r = requests.post("https://fcm.googleapis.com/v1/projects/second-14d46/messages:send",
+        r = requests.post("https://fcm.googleapis.com/v1/projects/appvendasplus/messages:send",
                         json=params,
 
                         headers=headers,
@@ -48,7 +49,7 @@ def enviar_notificacao(token, idmsg, title, mensage):
     resultado = enviar_token(token, idmsg, str(title), str(mensage), None, None)
     logging.info(f"Resultado do envio: {resultado}")
     if resultado["STATUS_CODE"] == 200:
-        atualiza_notificacao_sent(idmsg)
+        # atualiza_notificacao_sent(idmsg)
         return {"sucesso": True}
     else:
         return {"sucesso": False, "msg": resultado["TEXT"] }
@@ -116,21 +117,21 @@ def envia_id_noti():
     if idsEnviados is None:
         idsEnviados = []
 
-    for _ in range(3):
-        if idsEnviados:
-            logging.info(f"IDs a enviar: {idsEnviados}")
-            retorno = setando_enviado(idsEnviados)
-            time.sleep(0.2)
-            if retorno.get('sucesso'): 
-                logging.info(f"IDs enviados com sucesso: {idsEnviados}")
-                idsEnviados = []
-                break
+    # for _ in range(3):
+    #     if idsEnviados:
+    #         logging.info(f"IDs a enviar: {idsEnviados}")
+    #         retorno = setando_enviado(idsEnviados)
+    #         time.sleep(0.2)
+    #         if retorno.get('sucesso'): 
+    #             logging.info(f"IDs enviados com sucesso: {idsEnviados}")
+    #             idsEnviados = []
+    #             break
 
 
 
 
 def main_xfunc():
-
+        print("enviando...")
         try:
             envia_id_noti()
 
@@ -177,6 +178,9 @@ def run_schedule():
 schedule.every(10).seconds.do(main_xfunc)
 
 if __name__ == "__main__":
+    create_db()  # Inicializa o banco de dados e cria as tabelas necessárias
+    # Inicia o restante do seu processo (agendamentos, Flask, etc.)
+
     run_schedule()
 
-    app.run(debug=True, host="0.0.0.0", port=4002)
+threading.Thread(target=run_schedule, daemon=True).start()
